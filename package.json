@@ -1,0 +1,29 @@
+{
+  "name": "bipp-sdk",
+  "version": "1.0.0",
+  "description": "Bipp SDK",
+  "keywords": [
+    "bip sdk",
+    "embed analytics"
+  ],
+  "homepage": "https://github.com/skyword23/bipp-sdk",
+  "bugs": {
+    "url": "https://github.com/skyword23/bipp-sdk/issues",
+    "email": "skyword23@gmail.com"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/skyword23/bipp-sdk.git"
+  },
+  "author": "bipp.io",
+  "license": "MIT",
+  "private": false,
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "engineStrict": true
+}
