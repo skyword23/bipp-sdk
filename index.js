@@ -233,4 +233,3 @@ const ApiConst = {
   window.Bipp = Bipp;
 })();
 
-export Bipp;
