@@ -1,5 +1,5 @@
 {
-  "name": "bipp-sdk",
+  "name": "bipp",
   "version": "1.0.0",
   "description": "Bipp SDK",
   "keywords": [
@@ -11,7 +11,7 @@
     "url": "https://github.com/skyword23/bipp-sdk/issues",
     "email": "skyword23@gmail.com"
   },
-  "main": "index.js",
+  "main": "bipp.js",
   "scripts": {
     "test": "mocha"
   },
