@@ -1,5 +1,5 @@
 const ApiConst = {
-  VERSION: '2.0',
+  VERSION: '1.0.1',
   AUTH_TOKEN: 'authToken',
   ADD_FILTER: 'addFilter',
   REMOVE_FILTER: 'removeFilter',
@@ -28,6 +28,9 @@ const ApiConst = {
       window.onmessage = async (e) => {
         if (e.data.type == 'relogin') {
           this.reLogin();
+        }
+        else if (this.onmessage) {
+          this.onmessage(e);
         }
       };
     }
@@ -130,12 +133,43 @@ const ApiConst = {
       return false;
     }
 
-    async load({ element, config }) {
+    parse(url) {
+      // const url = "http://zwchaz.localhost:8080/embed/a4706a61-6a38-4993-8a99-5fc0c9d4329a?id=f86ea41b-13a5-4be4-bcd5-0e2720457df8&cid=7eab5475d5254d9aa95b8022fbc8bf28.zwchaz.localhost&secret=JDJhJDEwJFY2eXhOWm4uNk5DMy9MVnJ6Q01wZGUxNmZXd2dKd1NwS1lBRUN3NFBNN1poM0ZtMlFHTFRT";
+
+      console.log("url", url);
+      let toks = url.split("?");
+
+      const embed_url = toks[0];
+
+      this.server = embed_url.split("/embed")[0]
+      this.signed_url = embed_url;
+
+      const args = toks[1];
+
+      toks = args.split("&");
+      const app_id = toks[0].split("=")[1];
+      const client_id = toks[1].split("=")[1];
+      const client_secret = toks[2].split("=")[1];
+
+      this.auth_detail = {
+        app_id,
+        client_id,
+        client_secret
+      }
+    }
+
+    async load(url, config) {
+
+      this.parse(url); // TODO relogin use case
+      const { id, width = '600px', height='400px', style = ''} = config;
+
+      if (!id) throw `${SDK_Error} ${sign}, missing id`;
+      // if (!config) config = { width: '600px', height: '400px', style: '' };
 
       const res = await this.login();
       if (!res) return;
 
-      this.element = element;
+      this.element = document.getElementById(id);
       this.config = config;
 
       if (this.iframe && element.contains(this.iframe)) {
@@ -147,15 +181,12 @@ const ApiConst = {
 
       const sign = 'USAGE: load({<element>, <url>, [<config>]})';
 
-      if (!element) throw `${SDK_Error} ${sign}, missing element`;
-      if (!config) config = { width: '600px', height: '400px', style: '' };
-
-      iframe.width = config.width;
-      iframe.height = config.height;
-      iframe.style = config.style;
+      iframe.width = width;
+      iframe.height = height;
+      iframe.style = style;
       iframe.src = this.url;
 
-      element.appendChild(iframe);
+      this.element.appendChild(iframe);
 
       iframe.onload = () => {
         
@@ -232,4 +263,3 @@ const ApiConst = {
   }
   window.Bipp = Bipp;
 })();
-
