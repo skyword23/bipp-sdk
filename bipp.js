@@ -1,6 +1,6 @@
 const ApiConst = {
-  VERSION: '1.0.0',
-  AUTH_TOKEN: 'authToken',
+  VERSION: '1.0.3',
+  INIT: 'init',
   ADD_FILTER: 'addFilter',
   REMOVE_FILTER: 'removeFilter',
   DECORATE: 'decorate',
@@ -205,8 +205,8 @@ const ApiConst = {
           this.auth_done = true;
           iframe.contentWindow.postMessage(
             {
-              type: ApiConst.AUTH_TOKEN,
-              payload: this.auth_detail,
+              type: ApiConst.INIT,
+              payload: { authToken: this.auth_detail, config : this.config},
             },
             '*'
           );
