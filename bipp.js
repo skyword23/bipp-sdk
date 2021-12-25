@@ -1,5 +1,5 @@
 const ApiConst = {
-  VERSION: '1.0.3',
+  VERSION: '1.0.4',
   INIT: 'init',
   ADD_FILTER: 'addFilter',
   REMOVE_FILTER: 'removeFilter',
@@ -13,7 +13,10 @@ const ApiConst = {
   const SDK_Error = ApiConst.MSG_PREFIX + ' Error';
 
   class Bipp {
-    constructor() {
+
+    static allInstances = {};
+
+    constructor(args) {
 
       this.config = null;
       this.auth_done = false;
@@ -24,17 +27,45 @@ const ApiConst = {
       this.signed_url = null;
       
       this.lastLoginTime = null;
+      if (args) {
+        this.debug = args.debug;
+      }
 
       console.log(`${ApiConst.MSG_PREFIX} Version ${ApiConst.VERSION}`);
 
       window.onmessage = async (e) => {
-        if (e.data.type == 'relogin') {
-          this.reLogin();
+        const { type, from } = e.data;
+
+        if (type == 'sendAuth') {
+          let bippInst = this.getInstance(from);
+          if (bippInst) {
+            bippInst.sendAuthDetails();
+          } 
+        }
+        else if (type == 'relogin') {
+          let bippInst = this.getInstance(from);
+          if (bippInst) {
+            bippInst.reLogin();
+          }
         }
         else if (this.onmessage) {
           this.onmessage(e);
         }
       };
+    }
+
+    log(...args) {
+      if (this.debug) {
+        console.log("BippSDK", this.url, args);
+      }
+    }
+
+    setInstance(url) {
+      Bipp.allInstances[url] = this;
+    }
+
+    getInstance(url) {
+      return Bipp.allInstances[url];
     }
 
     async reLogin() {
@@ -109,6 +140,7 @@ const ApiConst = {
 
         if (res) {
           this.url = res.data.url;
+          this.setInstance(this.url);
           this.auth_detail.embedToken = res.data.embed_token;
           return true;
         }
@@ -167,6 +199,23 @@ const ApiConst = {
       return true;
     }
 
+    sendAuthDetails() {
+      if (!this.auth_done && this.auth_detail) {
+        this.auth_done = true;
+        this.log('sending authdetails');
+        this.iframe.contentWindow.postMessage(
+          {
+            type: ApiConst.INIT,
+            payload: { authToken: this.auth_detail, config : this.config},
+          },
+          '*'
+        );
+      }
+      else {
+        this.log('authdetails already sent')
+      }
+    }
+
     async load(url, config) {
 
       if (!this.server) { // First load
@@ -200,17 +249,7 @@ const ApiConst = {
       this.element.appendChild(iframe);
 
       iframe.onload = () => {
-        
-        if (!this.auth_done && this.auth_detail) {
-          this.auth_done = true;
-          iframe.contentWindow.postMessage(
-            {
-              type: ApiConst.INIT,
-              payload: { authToken: this.auth_detail, config : this.config},
-            },
-            '*'
-          );
-        }
+        this.log('onload complete');
       };
     }
 
@@ -274,3 +313,4 @@ const ApiConst = {
   }
   window.Bipp = Bipp;
 })();
+
